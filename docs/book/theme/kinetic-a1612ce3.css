@@ -1,0 +1,198 @@
+/* Kinetic Precision — tailx mdBook theme
+   Matches the GitHub Pages landing page design system.
+   Space Grotesk headlines, Inter body, JetBrains Mono code.
+   Primary: #00677f → #00d1ff gradient. */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Navy theme (primary) ── */
+.navy {
+    --bg: #fcf9f8;
+    --fg: #1c1b1b;
+    --sidebar-bg: #f6f3f2;
+    --sidebar-fg: #1c1b1b;
+    --sidebar-non-existant: #6c797f;
+    --sidebar-active: #00677f;
+    --sidebar-spacer: #bbc9cf;
+    --scrollbar: #bbc9cf;
+    --icons: #6c797f;
+    --icons-hover: #00677f;
+    --links: #00677f;
+    --inline-code-color: #00566a;
+    --theme-popup-bg: #f6f3f2;
+    --theme-popup-border: #bbc9cf;
+    --theme-hover: #eae7e7;
+    --quote-bg: #f6f3f2;
+    --quote-border: #00677f;
+    --table-border-color: #bbc9cf;
+    --table-header-bg: #f6f3f2;
+    --table-alternate-bg: #fcf9f8;
+    --searchbar-border-color: #bbc9cf;
+    --searchbar-bg: #ffffff;
+    --searchbar-fg: #1c1b1b;
+    --searchbar-shadow-color: rgba(0, 103, 127, 0.08);
+    --searchresults-header-fg: #00677f;
+    --searchresults-border-color: #bbc9cf;
+    --searchresults-li-bg: #f6f3f2;
+    --search-mark-bg: #b7eaff;
+}
+
+/* ── Dark overrides (ayu/coal) ── */
+.ayu, .coal {
+    --bg: #141519;
+    --fg: #c0caf5;
+    --sidebar-bg: #1a1b26;
+    --sidebar-fg: #a9b1d6;
+    --sidebar-active: #7dcfff;
+    --links: #7dcfff;
+    --inline-code-color: #7dcfff;
+    --quote-bg: #1a1b26;
+    --quote-border: #00677f;
+    --table-header-bg: #1a1b26;
+    --table-alternate-bg: #16171f;
+    --searchbar-bg: #1a1b26;
+    --searchbar-fg: #c0caf5;
+    --search-mark-bg: #00677f;
+}
+
+/* ── Typography ── */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+h1 { font-weight: 800; }
+
+code, pre, .hljs {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    font-size: 0.875em;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 500;
+}
+
+.sidebar .sidebar-scrollbox {
+    padding-top: 1.5rem;
+}
+
+.sidebar a.active {
+    color: var(--sidebar-active) !important;
+    font-weight: 700;
+    border-left: 3px solid var(--sidebar-active);
+    padding-left: 0.75rem;
+    margin-left: -0.75rem;
+}
+
+/* ── Content area ── */
+.content main {
+    max-width: 52rem;
+    line-height: 1.75;
+}
+
+.content main h1 {
+    font-size: 2.5rem;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--links);
+}
+
+.content main h2 {
+    font-size: 1.75rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--links);
+}
+
+.content main h3 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+}
+
+/* ── Code blocks ── */
+pre {
+    border-radius: 0.25rem;
+    border-left: 3px solid var(--links);
+    padding: 1rem 1.25rem !important;
+}
+
+code:not(pre > code) {
+    padding: 0.15em 0.4em;
+    border-radius: 0.15rem;
+    background: var(--quote-bg);
+    font-size: 0.9em;
+}
+
+/* ── Tables ── */
+table {
+    border-radius: 0.25rem;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+table th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--links);
+    padding: 0.75rem 1rem;
+}
+
+table td {
+    padding: 0.6rem 1rem;
+}
+
+/* ── Blockquotes ── */
+blockquote {
+    border-left-width: 3px;
+    border-color: var(--links);
+    background: var(--quote-bg);
+    padding: 1rem 1.5rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+/* ── Links ── */
+a {
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ── Nav buttons ── */
+.nav-chapters {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    transition: transform 0.15s ease;
+}
+
+.nav-chapters:hover {
+    transform: translateX(2px);
+}
+
+/* ── Back to site link ── */
+.sidebar .chapter li.part-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--sidebar-active);
+    margin-top: 1.5rem;
+}

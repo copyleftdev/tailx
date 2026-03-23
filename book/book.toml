@@ -1,0 +1,16 @@
+[book]
+title = "tailx Documentation"
+authors = ["copyleftdev"]
+language = "en"
+description = "Complete documentation for tailx — the live system cognition engine"
+
+[build]
+build-dir = "../docs/book"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/copyleftdev/tailx"
+site-url = "/tailx/book/"
+additional-css = ["theme/kinetic.css"]
+no-section-label = false
