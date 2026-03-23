@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>tailx — Live System Cognition Engine</title>
+<meta name="description" content="Reimagines tail from 'show me lines' to 'what's happening, what matters, and why?' Auto-detects log formats, groups patterns, detects anomalies, reconstructs traces. 144 KB binary. Zero config. 69K events/sec."/>
+<meta name="keywords" content="log analysis, observability, tail, anomaly detection, pattern recognition, sre, devops, incident response, ai tools, zig"/>
+<meta property="og:title" content="tailx — Live System Cognition Engine"/>
+<meta property="og:description" content="23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis. In 2.7 seconds. Zero config."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://copyleftdev.github.io/tailx/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="tailx — Live System Cognition Engine"/>
+<meta name="twitter:description" content="Reimagines tail. Auto-detects formats, groups patterns, detects anomalies. 144 KB. Zero config. 69K events/sec."/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-lowest": "#ffffff",
+        "tertiary": "#7c5800",
+        "primary-fixed": "#b7eaff",
+        "primary-fixed-dim": "#4cd6ff",
+        "on-background": "#1c1b1b",
+        "on-primary-fixed": "#001f28",
+        "tertiary-container": "#f9b400",
+        "secondary-fixed": "#5bffa1",
+        "secondary-fixed-dim": "#00e383",
+        "on-secondary-container": "#006e3c",
+        "surface-dim": "#dcd9d9",
+        "surface": "#fcf9f8",
+        "on-error-container": "#93000a",
+        "surface-bright": "#fcf9f8",
+        "surface-container-high": "#eae7e7",
+        "on-secondary": "#ffffff",
+        "on-surface-variant": "#3c494e",
+        "surface-container-highest": "#e5e2e1",
+        "surface-tint": "#00677f",
+        "error-container": "#ffdad6",
+        "inverse-primary": "#4cd6ff",
+        "secondary": "#006d3c",
+        "surface-container": "#f0eded",
+        "error": "#ba1a1a",
+        "surface-variant": "#e5e2e1",
+        "surface-container-low": "#f6f3f2",
+        "on-error": "#ffffff",
+        "on-tertiary": "#ffffff",
+        "primary": "#00677f",
+        "outline": "#6c797f",
+        "outline-variant": "#bbc9cf",
+        "primary-container": "#00d1ff",
+        "on-surface": "#1c1b1b",
+        "background": "#fcf9f8",
+        "on-primary": "#ffffff",
+        "secondary-container": "#00f991",
+        "inverse-on-surface": "#f3f0ef",
+        "inverse-surface": "#313030",
+        "on-primary-container": "#00566a"
+      },
+      fontFamily: {
+        "headline": ["Space Grotesk"],
+        "body": ["Inter"],
+        "mono": ["JetBrains Mono"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+}
+</script>
+<style>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.kinetic-grid {
+  background-image: radial-gradient(#bbc9cf 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.terminal-window {
+  box-shadow: 0 20px 40px rgba(0, 103, 127, 0.08);
+}
+.primary-gradient {
+  background: linear-gradient(135deg, #00677f 0%, #00d1ff 100%);
+}
+.terminal-dark {
+  background: #1a1b26;
+  color: #a9b1d6;
+}
+.t-red { color: #f7768e; }
+.t-yellow { color: #e0af68; font-weight: 700; }
+.t-green { color: #9ece6a; }
+.t-cyan { color: #7dcfff; }
+.t-dim { color: #565f89; }
+.t-white { color: #c0caf5; font-weight: 700; }
+.t-bold { font-weight: 700; }
+</style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#fcf9f8]/95 backdrop-blur-sm">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black tracking-tighter text-[#1c1b1b] font-['Space_Grotesk']">tailx</span>
+<nav class="hidden md:flex gap-8">
+<a class="text-[#00677f] border-b-2 border-[#00677f] pb-1 font-['Space_Grotesk'] font-bold tracking-tight" href="#features">Features</a>
+<a class="text-[#6c797f] hover:text-[#1c1b1b] font-['Space_Grotesk'] font-bold tracking-tight transition-opacity duration-150" href="#benchmarks">Benchmarks</a>
+<a class="text-[#6c797f] hover:text-[#1c1b1b] font-['Space_Grotesk'] font-bold tracking-tight transition-opacity duration-150" href="#ai">AI Interface</a>
+<a class="text-[#6c797f] hover:text-[#1c1b1b] font-['Space_Grotesk'] font-bold tracking-tight transition-opacity duration-150" href="https://github.com/copyleftdev/tailx">GitHub</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<a href="https://github.com/copyleftdev/tailx" class="bg-[#00677f] text-white px-5 py-1.5 font-['Space_Grotesk'] font-bold rounded-DEFAULT hover:opacity-80 transition-opacity">View Source</a>
+</div>
+</div>
+</header>
+
+<main class="pt-24 overflow-x-hidden">
+
+<!-- Hero Section -->
+<section class="relative kinetic-grid min-h-[90vh] flex flex-col items-center justify-center px-6 py-20">
+<div class="max-w-5xl w-full text-center mb-16">
+<h1 class="font-headline font-black text-6xl md:text-[5.5rem] leading-[0.95] tracking-tighter mb-8">
+The Live System<br/><span class="text-primary">Cognition Engine</span>
+</h1>
+<p class="text-xl md:text-2xl text-outline font-medium max-w-3xl mx-auto mb-4 leading-relaxed">
+Reimagines <code class="bg-surface-container-high px-2 py-0.5 rounded text-on-surface font-mono">tail</code> from "show me lines" to "what's happening, what matters, and why?"
+</p>
+<p class="font-mono text-sm text-primary mb-10">
+23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis
+</p>
+<div class="flex flex-col gap-4 max-w-2xl mx-auto w-full">
+<div class="flex items-center bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-1 pl-4 shadow-sm group hover:border-primary/50 transition-colors">
+<code class="font-mono text-primary font-semibold mr-4 text-sm truncate">zig build -Doptimize=ReleaseSafe && cp ./zig-out/bin/tailx ~/.local/bin/</code>
+<a href="https://github.com/copyleftdev/tailx" class="primary-gradient text-white px-6 py-3 rounded-lg font-headline font-bold text-xs tracking-wide uppercase hover:-translate-y-0.5 transition-transform whitespace-nowrap">
+Clone Repo
+</a>
+</div>
+<p class="text-xs text-outline font-mono uppercase tracking-widest">Requires Zig 0.14.0 &bull; 144 KB Binary &bull; Zero Dependencies &bull; MIT License</p>
+</div>
+</div>
+
+<!-- Terminal Mockup -->
+<div class="w-full max-w-6xl mx-auto px-4 relative">
+<div class="terminal-window bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20">
+<div class="bg-surface-container-low px-4 py-3 flex items-center justify-between">
+<div class="flex gap-1.5">
+<div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+<div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+<div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+</div>
+<div class="text-xs font-mono text-outline">tailx -s -n /var/log/syslog</div>
+<div class="w-12"></div>
+</div>
+<div class="terminal-dark p-6 font-mono text-xs leading-relaxed overflow-x-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="opacity-40 select-none space-y-0.5">
+<div>4ubox NetworkManager[2876]: &lt;info&gt; dhcp4 activation...</div>
+<div>4ubox avahi-daemon[2711]: Interface enx92a...IPv6 no longer relevant</div>
+<div>4ubox NetworkManager[2876]: &lt;info&gt; dhcp4 activation...</div>
+<div>4ubox kernel: audit: apparmor="DENIED" operation="connect"...</div>
+<div>4ubox avahi-daemon[2711]: Registering new address record...</div>
+<div>4ubox Tor[4888]: Tor has been idle for 3600 seconds...</div>
+<div>4ubox NetworkManager[2876]: &lt;info&gt; device state change...</div>
+<div>4ubox avahi-daemon[2711]: Interface enx92a...IPv6 no longer relevant</div>
+<div class="t-dim">... 23,899 more lines ...</div>
+</div>
+<div class="space-y-3">
+<div class="text-[10px] uppercase tracking-widest t-dim mb-2">Pattern Summary &bull; 23,907 events &bull; 118 groups &bull; 51 templates &bull; 8,681 ev/s</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#f7768e]">
+<div class="flex justify-between items-center">
+<span class="t-red t-bold">Tor idle cycling</span>
+<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×4,663</span>
+</div>
+<div class="t-dim text-[10px] mt-1">Tor has been idle for 3600 seconds; assuming circuits no longer work</div>
+</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#e0af68]">
+<div class="flex justify-between items-center">
+<span class="t-yellow">NetworkManager DHCP churn</span>
+<span class="text-[10px] bg-[#e0af68]/20 text-[#e0af68] px-2 py-0.5 rounded font-bold">×3,907</span>
+</div>
+<div class="t-dim text-[10px] mt-1">dhcp4 (enx92a14f22dda8): activation beginning transaction</div>
+</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#e0af68]">
+<div class="flex justify-between items-center">
+<span class="t-yellow">Avahi interface bouncing</span>
+<span class="text-[10px] bg-[#e0af68]/20 text-[#e0af68] px-2 py-0.5 rounded font-bold">×3,213</span>
+</div>
+<div class="t-dim text-[10px] mt-1">Interface enx92a14f22dda8.IPv6 no longer relevant for mDNS</div>
+</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#f7768e]">
+<div class="flex justify-between items-center">
+<span class="t-red">AppArmor DENIED</span>
+<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×1,855</span>
+</div>
+<div class="t-dim text-[10px] mt-1">wsdd blocked from /run/uuidd/request</div>
+</div>
+<div class="mt-3 pt-3 border-t border-white/10 t-dim text-[10px]">
+<span class="t-cyan">Root cause:</span> USB ethernet adapter cycling → NetworkManager → Avahi → wsdd cascade
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- The Numbers -->
+<section id="benchmarks" class="bg-white py-24 px-8 border-y border-outline-variant/10">
+<div class="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-5 gap-12">
+<div class="space-y-2">
+<div class="text-5xl font-headline font-black tracking-tighter text-on-background">144 <span class="text-xl font-medium text-outline">KB</span></div>
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-bold">Stripped Binary</div>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-black tracking-tighter text-on-background">69K</div>
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-bold">Events / Second</div>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-black tracking-tighter text-on-background">0</div>
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-bold">Dependencies</div>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-black tracking-tighter text-on-background">219</div>
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-bold">Tests Passing</div>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-black tracking-tighter text-on-background">&lt;1 <span class="text-xl font-medium text-outline">ms</span></div>
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-bold">Cold Start</div>
+</div>
+</div>
+</section>
+
+<!-- The Three Pillars -->
+<section id="features" class="py-32 px-8">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline font-bold text-4xl mb-20 tracking-tight">The Pipeline</h2>
+<div class="grid md:grid-cols-3 gap-16">
+<div>
+<div class="mb-6 flex items-center justify-center w-16 h-16 rounded-lg bg-primary-container/20 text-primary">
+<span class="material-symbols-outlined text-3xl">input</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-4">1. Ingest &amp; Parse</h3>
+<p class="text-outline leading-relaxed">Auto-detects JSON, logfmt, syslog, and unstructured formats. Extracts severity, service, trace IDs, and structured fields. Zero config. Per-source format locking after 8 lines.</p>
+</div>
+<div>
+<div class="mb-6 flex items-center justify-center w-16 h-16 rounded-lg bg-primary-container/20 text-primary">
+<span class="material-symbols-outlined text-3xl">group_work</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-4">2. Group &amp; Rank</h3>
+<p class="text-outline leading-relaxed">Drain algorithm fingerprints messages into structural templates. 23,907 lines collapse into 51 templates. Groups ranked by severity &times; frequency &times; trend. Rising, stable, falling, gone.</p>
+</div>
+<div>
+<div class="mb-6 flex items-center justify-center w-16 h-16 rounded-lg bg-primary-container/20 text-primary">
+<span class="material-symbols-outlined text-3xl">troubleshoot</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-4">3. Detect &amp; Correlate</h3>
+<p class="text-outline leading-relaxed">EWMA + z-score rate spike detection. CUSUM change-point detector. Temporal proximity correlation &mdash; "DB latency spiked 2s before error rate. Likely related (82% confidence)."</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- AI Interface Section -->
+<section id="ai" class="bg-surface-container-low py-32 px-8">
+<div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+<div class="order-2 lg:order-1">
+<div class="bg-surface-container-highest p-8 rounded-lg border border-outline-variant/20 shadow-inner">
+<div class="flex items-center gap-2 mb-4 border-b border-outline-variant/20 pb-4">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="font-mono text-xs text-outline">tailx --json -s -n /var/log/syslog | tail -1</span>
+</div>
+<pre class="font-mono text-xs leading-relaxed text-on-surface overflow-x-auto">{
+  "type": "triage_summary",
+  "stats": {
+    "events": 23907,
+    "groups": 118,
+    "templates": 51,
+    "events_per_sec": 8681.1
+  },
+  "top_groups": [
+    {
+      "exemplar": "Tor idle for 3600 seconds...",
+      "count": 4663,
+      "severity": "INFO",
+      "trend": "new"
+    },
+    {
+      "exemplar": "dhcp4 activation...",
+      "count": 3907,
+      "trend": "new",
+      "service": "NetworkManager"
+    }
+  ],
+  "anomalies": [...],
+  "hypotheses": [...],
+  "traces": [...]
+}</pre>
+</div>
+</div>
+<div class="order-1 lg:order-2">
+<div class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-mono text-xs font-bold mb-6">AI-NATIVE INTERFACE</div>
+<h2 class="font-headline font-black text-5xl mb-8 tracking-tighter">Built for AI Agents</h2>
+<p class="text-xl text-outline mb-10 leading-relaxed">
+<code class="font-mono text-primary">--json</code> emits structured JSONL. The last line is always a <code class="font-mono">triage_summary</code> &mdash; one object containing every insight the engine computed: groups, anomalies, correlations, traces.
+</p>
+<ul class="space-y-4">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium">Structured triage replaces raw log parsing</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium">One subprocess call for complete system state</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium">MCP tool / agent integration ready</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-medium">Intent queries: <code class="font-mono text-primary text-sm">"errors related to payments"</code></span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- Modes -->
+<section class="py-32 px-8">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline font-black text-5xl mb-4 tracking-tighter text-center">Five Modes</h2>
+<p class="text-outline text-lg text-center mb-20">Every mode uses the same engine. Different lenses on the same intelligence.</p>
+<div class="grid md:grid-cols-5 gap-6">
+<div class="bg-surface-container-low p-8 border-t-2 border-primary">
+<h4 class="font-mono text-sm font-bold mb-2 text-primary">--raw</h4>
+<p class="text-outline text-sm leading-relaxed">Classic tail. Line by line. No grouping.</p>
+</div>
+<div class="bg-surface-container-low p-8 border-t-2 border-primary">
+<h4 class="font-mono text-sm font-bold mb-2 text-primary">(default)</h4>
+<p class="text-outline text-sm leading-relaxed">Pattern mode. Lines + ranked group summary at end.</p>
+</div>
+<div class="bg-surface-container-low p-8 border-t-2 border-secondary">
+<h4 class="font-mono text-sm font-bold mb-2 text-secondary">--trace</h4>
+<p class="text-outline text-sm leading-relaxed">Trace view. Events grouped by trace_id as request flow trees.</p>
+</div>
+<div class="bg-surface-container-low p-8 border-t-2 border-tertiary">
+<h4 class="font-mono text-sm font-bold mb-2 text-tertiary">--incident</h4>
+<p class="text-outline text-sm leading-relaxed">Only anomalies + top rising groups. Suppress normal events.</p>
+</div>
+<div class="bg-surface-container-low p-8 border-t-2 border-on-surface">
+<h4 class="font-mono text-sm font-bold mb-2">--json</h4>
+<p class="text-outline text-sm leading-relaxed">JSONL for AI agents. Triage summary as last line.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Feature Grid -->
+<section class="bg-surface-container-low py-32 px-8">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-24">
+<h2 class="font-headline font-black text-5xl mb-4 tracking-tighter">Under the Hood</h2>
+<p class="text-outline text-lg">Statistical-first. No LLM in the hot path. Math is fast, deterministic, and explainable.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="bg-white p-10 border-t-2 border-primary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">Drain Templates</h4>
+<p class="text-outline leading-relaxed">Fixed-depth tree parser collapses "Connection to 10.0.0.1 timed out" and "Connection to 10.0.0.2 timed out" into one template with parameter tracking.</p>
+</div>
+<div class="bg-white p-10 border-t-2 border-primary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">EWMA + CUSUM</h4>
+<p class="text-outline leading-relaxed">Dual-rate exponential moving averages for rate baselines. Cumulative sum detector for sustained shifts that z-score alone would miss. 3&sigma; minimum threshold.</p>
+</div>
+<div class="bg-white p-10 border-t-2 border-primary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">Probabilistic Sketches</h4>
+<p class="text-outline leading-relaxed">HyperLogLog for cardinality estimation. Count-Min Sketch for frequency. T-Digest for streaming percentiles. All O(1) memory, O(1) per event.</p>
+</div>
+<div class="bg-white p-10 border-t-2 border-secondary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">Multi-Format Parser</h4>
+<p class="text-outline leading-relaxed">JSON, logfmt/key=value, syslog BSD, and unstructured text. Auto-detected per source. Extracts severity, service, trace_id, structured fields.</p>
+</div>
+<div class="bg-white p-10 border-t-2 border-secondary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">Trace Reconstruction</h4>
+<p class="text-outline leading-relaxed">Events with matching trace_id are grouped into request flow trees with duration and outcome detection (success, failure, timeout).</p>
+</div>
+<div class="bg-white p-10 border-t-2 border-secondary">
+<h4 class="font-headline font-bold text-xl mb-4 uppercase tracking-wider">Arena Allocation</h4>
+<p class="text-outline leading-relaxed">Generation-tagged arena allocators. Bulk free on window expiry. Zero per-event heap allocation in steady state. Zig stdlib only.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Final CTA -->
+<section class="py-32 px-8 relative overflow-hidden">
+<div class="absolute inset-0 primary-gradient opacity-5"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<h2 class="font-headline font-black text-5xl md:text-6xl mb-4 tracking-tighter">See the Signal.</h2>
+<p class="text-outline text-xl mb-10">24,000 lines of noise. 3 root causes. One command.</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+<a href="https://github.com/copyleftdev/tailx" class="primary-gradient text-white px-10 py-5 rounded font-headline font-black text-lg tracking-widest uppercase hover:-translate-y-1 transition-transform shadow-xl shadow-primary/20">
+View on GitHub
+</a>
+</div>
+<p class="mt-10 font-mono text-xs text-outline">
+tailx v1.0.0 &bull; 8,347 lines of Zig &bull; 219 tests &bull; MIT License
+</p>
+</div>
+</section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-[#f6f3f2] border-t-0">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 max-w-7xl mx-auto">
+<div class="mb-8 md:mb-0">
+<span class="text-lg font-bold text-[#1c1b1b] font-['Space_Grotesk']">tailx</span>
+<p class="font-['Inter'] text-xs uppercase tracking-widest text-[#6c797f] mt-2">&copy; 2026 tailx contributors. MIT License.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-sm uppercase tracking-widest text-[#6c797f] hover:text-[#00677f] transition-colors" href="https://github.com/copyleftdev/tailx">GitHub</a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest text-[#6c797f] hover:text-[#00677f] transition-colors" href="https://github.com/copyleftdev/tailx#usage">Docs</a>
+<a class="font-['Inter'] text-sm uppercase tracking-widest text-[#6c797f] hover:text-[#00677f] transition-colors" href="https://github.com/copyleftdev/tailx/blob/main/LICENSE">License</a>
+</div>
+</div>
+</footer>
+</body>
+</html>
