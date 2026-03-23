@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "../searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ef60543d.js"></script>
@@ -220,12 +220,12 @@
 <pre><code class="language-json">{
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
     "drops": 0,
-    "events_per_sec": 8860.4,
-    "elapsed_ms": 2698
+    "events_per_sec": 15252.0,
+    "elapsed_ms": 3100
   },
   "top_groups": [...],
   "anomalies": [...],
@@ -236,7 +236,7 @@
 <p>The triage summary is the “money shot” for AI integration. It contains everything the engine computed, structured for machine reasoning. See <a href="triage-schema.html">Triage Summary Schema</a> for the full schema.</p>
 <h2 id="usage-patterns"><a class="header" href="#usage-patterns">Usage patterns</a></h2>
 <h3 id="read-full-file-to-json"><a class="header" href="#read-full-file-to-json">Read full file to JSON</a></h3>
-<pre><code class="language-bash">tailx --json -s -n /var/log/syslog
+<pre><code class="language-bash">tailx --json -s -n app.log
 </code></pre>
 <ul>
 <li><code>--json</code>: JSONL output</li>
@@ -244,7 +244,7 @@
 <li><code>-n</code> (<code>--no-follow</code>): read to EOF and stop</li>
 </ul>
 <h3 id="get-just-the-triage-summary"><a class="header" href="#get-just-the-triage-summary">Get just the triage summary</a></h3>
-<pre><code class="language-bash">tailx --json -s -n /var/log/syslog | tail -1
+<pre><code class="language-bash">tailx --json -s -n app.log | tail -1
 </code></pre>
 <p>The last line is always the <code>triage_summary</code>. Use <code>tail -1</code> to extract it.</p>
 <h3 id="filter-events-in-json-mode"><a class="header" href="#filter-events-in-json-mode">Filter events in JSON mode</a></h3>
@@ -262,24 +262,24 @@ tailx --json -s -n app.log | tail -1 | jq '.top_groups[].exemplar'
 tailx --json -s -n app.log | jq -r 'select(.type=="event") | .service // "unknown"' | sort | uniq -c | sort -rn
 </code></pre>
 <h2 id="real-triage-summary-example"><a class="header" href="#real-triage-summary-example">Real triage summary example</a></h2>
-<p>From the syslog test (23,907 events):</p>
+<p>From the production log test (47,283 events):</p>
 <pre><code class="language-json">{
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
     "drops": 0,
-    "events_per_sec": 8860.4,
-    "elapsed_ms": 2698
+    "events_per_sec": 15252.0,
+    "elapsed_ms": 3100
   },
   "top_groups": [
     {
-      "exemplar": "message repeated 2 times: [ &lt;*&gt; Avahi, Pair-Setup]",
+      "exemplar": "Connection pool exhausted, waiting for available connection",
       "count": 5765,
-      "severity": "INFO",
-      "trend": "stable",
-      "service": "avahi-daemon"
+      "severity": "WARN",
+      "trend": "rising",
+      "service": "db"
     },
     {
       "exemplar": "&lt;*&gt; carrier &lt;*&gt; ...",

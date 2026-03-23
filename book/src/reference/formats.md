@@ -120,7 +120,7 @@ The fallback parser extracts:
 Different sources can have different formats. A single tailx invocation can process JSON from one file and syslog from another:
 
 ```bash
-tailx /var/log/syslog /var/log/app.json.log
+tailx app.log api.json.log
 ```
 
 Each source locks to its detected format independently after 8 lines.

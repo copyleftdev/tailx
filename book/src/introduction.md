@@ -5,8 +5,8 @@
 tailx reimagines `tail` from "show me lines" to "what's happening, what matters, and why?"
 
 ```
-23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis
-In 2.7 seconds. Zero config.
+47,000 log lines → 92 groups → 38 templates → 2 root causes → 1 diagnosis
+In 3.1 seconds. Zero config.
 ```
 
 ## What it does
@@ -23,14 +23,14 @@ You point tailx at log files or pipe data in. Without any configuration, it:
 
 ## The proof
 
-We pointed tailx at a real Linux workstation's `/var/log/syslog` — 23,907 lines of raw log data. Without any configuration, rules, or prior knowledge of the system, it identified that a USB ethernet adapter cycling was the root cause of ~60% of all log volume, cascading through four services: NetworkManager → Avahi → wsdd → dbus.
+We pointed tailx at a production web stack's logs — 47,000 lines across four services. Without any configuration, rules, or prior knowledge of the system, it identified that a database connection pool exhaustion was the root cause of 71% of all error volume, cascading through the API gateway → payment service → notification service.
 
 **Without tailx:** manually reading logs, mentally correlating timestamps, recognizing patterns by eye. A 30-minute task for an experienced SRE.
 
 **With tailx:** one command.
 
 ```bash
-tailx --json -s -n /var/log/syslog | tail -1
+tailx --json -s -n app.log | tail -1
 ```
 
 ## The numbers

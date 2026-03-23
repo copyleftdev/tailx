@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "../searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ef60543d.js"></script>
@@ -188,7 +188,7 @@
 import json
 
 result = subprocess.run(
-    ["tailx", "--json", "-s", "-n", "--last", "5m", "/var/log/syslog"],
+    ["tailx", "--json", "-s", "-n", "--last", "5m", "app.log"],
     capture_output=True,
     text=True
 )
@@ -203,7 +203,7 @@ print(f"Top issue: {triage['top_groups'][0]['exemplar']}")
 </code></pre>
 <h3 id="shell-example"><a class="header" href="#shell-example">Shell example</a></h3>
 <pre><code class="language-bash"># Get triage summary as JSON
-TRIAGE=$(tailx --json -s -n --last 5m /var/log/syslog | tail -1)
+TRIAGE=$(tailx --json -s -n --last 5m app.log | tail -1)
 
 # Extract top group with jq
 echo "$TRIAGE" | jq -r '.top_groups[0].exemplar'
@@ -219,7 +219,7 @@ echo "$TRIAGE" | jq -r '.top_groups[0].exemplar'
       "files": {
         "type": "array",
         "items": { "type": "string" },
-        "description": "Log file paths to analyze (e.g., [\"/var/log/syslog\"])"
+        "description": "Log file paths to analyze (e.g., [\"app.log\", \"db.log\"])"
       },
       "time_window": {
         "type": "string",
@@ -265,7 +265,7 @@ echo "$TRIAGE" | jq -r '.top_groups[0].exemplar'
     return json.loads(lines[-1])
 </code></pre>
 <h2 id="what-the-ai-receives"><a class="header" href="#what-the-ai-receives">What the AI receives</a></h2>
-<p>When an agent calls <code>tailx_triage(files=["/var/log/syslog"], time_window="5m")</code>, it receives a structured object like:</p>
+<p>When an agent calls <code>tailx_triage(files=["app.log"], time_window="5m")</code>, it receives a structured object like:</p>
 <pre><code class="language-json">{
   "type": "triage_summary",
   "stats": {

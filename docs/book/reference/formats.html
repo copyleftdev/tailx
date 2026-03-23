@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "../searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ef60543d.js"></script>
@@ -271,7 +271,7 @@
 </ol>
 <h2 id="format-mixing"><a class="header" href="#format-mixing">Format mixing</a></h2>
 <p>Different sources can have different formats. A single tailx invocation can process JSON from one file and syslog from another:</p>
-<pre><code class="language-bash">tailx /var/log/syslog /var/log/app.json.log
+<pre><code class="language-bash">tailx app.log api.json.log
 </code></pre>
 <p>Each source locks to its detected format independently after 8 lines.</p>
 <h2 id="detection-priority-on-ties"><a class="header" href="#detection-priority-on-ties">Detection priority on ties</a></h2>

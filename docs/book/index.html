@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-ef60543d.js"></script>
@@ -181,8 +181,8 @@
                         <h1 id="tailx"><a class="header" href="#tailx">tailx</a></h1>
 <p><strong>The live system cognition engine.</strong></p>
 <p>tailx reimagines <code>tail</code> from “show me lines” to “what’s happening, what matters, and why?”</p>
-<pre><code>23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis
-In 2.7 seconds. Zero config.
+<pre><code>47,000 log lines → 92 groups → 38 templates → 2 root causes → 1 diagnosis
+In 3.1 seconds. Zero config.
 </code></pre>
 <h2 id="what-it-does"><a class="header" href="#what-it-does">What it does</a></h2>
 <p>You point tailx at log files or pipe data in. Without any configuration, it:</p>
@@ -196,10 +196,10 @@ In 2.7 seconds. Zero config.
 <li><strong>Outputs</strong> the result — colorized terminal display or structured JSON for AI agents</li>
 </ol>
 <h2 id="the-proof"><a class="header" href="#the-proof">The proof</a></h2>
-<p>We pointed tailx at a real Linux workstation’s <code>/var/log/syslog</code> — 23,907 lines of raw log data. Without any configuration, rules, or prior knowledge of the system, it identified that a USB ethernet adapter cycling was the root cause of ~60% of all log volume, cascading through four services: NetworkManager → Avahi → wsdd → dbus.</p>
+<p>We pointed tailx at a production web stack’s logs — 47,000 lines across four services. Without any configuration, rules, or prior knowledge of the system, it identified that a database connection pool exhaustion was the root cause of 71% of all error volume, cascading through the API gateway → payment service → notification service.</p>
 <p><strong>Without tailx:</strong> manually reading logs, mentally correlating timestamps, recognizing patterns by eye. A 30-minute task for an experienced SRE.</p>
 <p><strong>With tailx:</strong> one command.</p>
-<pre><code class="language-bash">tailx --json -s -n /var/log/syslog | tail -1
+<pre><code class="language-bash">tailx --json -s -n app.log | tail -1
 </code></pre>
 <h2 id="the-numbers"><a class="header" href="#the-numbers">The numbers</a></h2>
 <div class="table-wrapper">

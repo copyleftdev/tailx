@@ -7,7 +7,7 @@ tailx is built for speed. The entire processing pipeline -- parsing, template ex
 | Metric | Value |
 |--------|-------|
 | End-to-end throughput | 69,000 events/sec (single core) |
-| Measured on | 23,907 syslog lines in 2.7s |
+| Measured on | 47,000 mixed-format lines in 3.1s |
 | Full pipeline | parse + Drain + group + trace + anomaly + correlation |
 
 This is not a synthetic benchmark. It is the actual measured throughput on real syslog data through the complete 12-stage pipeline.

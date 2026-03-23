@@ -76,7 +76,7 @@ This is the "pager duty" mode. No noise, just the signals that something changed
  !! ANOMALY: rate spike — observed 450.0 vs expected 120.3 (deviation: 4.2)
 
 ──────────────────────────────────────────────────────────────
- Pattern Summary  23907 events  118 groups  51 templates  8860 ev/s  2.7s
+ Pattern Summary  47283 events  92 groups  38 templates  15252 ev/s  3.1s
 ──────────────────────────────────────────────────────────────
   ✗ [payments] Connection refused to <*>  (x1204) ↑ rising
   ⚠ [payments] Connection pool exhausted  (x891) ↑ rising

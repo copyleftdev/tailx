@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "../searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ef60543d.js"></script>
@@ -208,7 +208,7 @@ tailx -g "connection refused" app.log
 </code></pre>
 <p>Filters events whose message contains the given substring. Uses Boyer-Moore-Horspool for fast matching. Case-sensitive.</p>
 <pre><code class="language-bash"># Only events mentioning "OOM"
-tailx -g OOM /var/log/syslog
+tailx -g OOM app.log
 
 # Combine with severity
 tailx -l error -g timeout app.log
@@ -240,10 +240,10 @@ tailx --field status=500 access.log
 tailx --field hostname=web01 app.log
 </code></pre>
 <h2 id="time-window-filter"><a class="header" href="#time-window-filter">Time window filter</a></h2>
-<pre><code class="language-bash">tailx --last 5m /var/log/syslog
+<pre><code class="language-bash">tailx --last 5m app.log
 tailx --last 1h app.log
 tailx --last 30s app.log
-tailx --last 2d /var/log/syslog
+tailx --last 2d app.log
 </code></pre>
 <p>Only displays events from within the given time window relative to now. Supported units:</p>
 <div class="table-wrapper">

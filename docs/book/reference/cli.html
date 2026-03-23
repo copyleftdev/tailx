@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ab53dda2.js";
+            window.path_to_searchindex_js = "../searchindex-d74c77a8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ef60543d.js"></script>
@@ -217,7 +217,7 @@ tailx -g "connection refused" app.log
 <p>Filter events whose message contains the given substring. Uses Boyer-Moore-Horspool for fast matching. Case-sensitive.</p>
 <h3 id="--service-name"><a class="header" href="#--service-name"><code>--service &lt;name&gt;</code></a></h3>
 <pre><code class="language-bash">tailx --service payments app.log
-tailx --service nginx /var/log/syslog
+tailx --service nginx app.log
 </code></pre>
 <p>Filter events by exact service name match. The service is auto-detected from the log format (JSON <code>service</code> key, syslog app name, bracketed text in unstructured logs).</p>
 <h3 id="--trace-id-id"><a class="header" href="#--trace-id-id"><code>--trace-id &lt;id&gt;</code></a></h3>
@@ -231,10 +231,10 @@ tailx --field user_id=42 app.log
 </code></pre>
 <p>Filter events by field value. Supports string and integer comparison – if the event field is an integer and the filter value parses as an integer, numeric comparison is used.</p>
 <h3 id="--last-duration"><a class="header" href="#--last-duration"><code>--last &lt;duration&gt;</code></a></h3>
-<pre><code class="language-bash">tailx --last 5m /var/log/syslog
+<pre><code class="language-bash">tailx --last 5m app.log
 tailx --last 1h app.log
 tailx --last 30s app.log
-tailx --last 2d /var/log/syslog
+tailx --last 2d app.log
 </code></pre>
 <p>Only display events from within the given time window. Supported suffixes: <code>s</code> (seconds), <code>m</code> (minutes), <code>h</code> (hours), <code>d</code> (days).</p>
 <h2 id="options"><a class="header" href="#options">Options</a></h2>
@@ -281,7 +281,7 @@ tailx access.log error.log
 <p>One or more file paths. Glob patterns (<code>*</code>, <code>?</code>) are expanded. Multiple files are merged into a single event stream, with source names displayed when more than one file is open.</p>
 <h3 id="intent-queries"><a class="header" href="#intent-queries">Intent queries</a></h3>
 <pre><code class="language-bash">tailx "errors related to payments" app.log
-tailx "5xx from nginx" /var/log/syslog
+tailx "5xx from nginx" app.log
 tailx "timeout" app.log
 </code></pre>
 <p>If a positional argument is not an existing file path, it is treated as a natural language intent query. Keywords are mapped to filters (severity thresholds, service names, message substrings). See <a href="../guide/intent-queries.html">Intent Queries</a>.</p>
@@ -296,7 +296,7 @@ dmesg | tailx --severity warn
 tailx app.log
 
 # Full file analysis
-tailx -s -n /var/log/syslog
+tailx -s -n app.log
 
 # Only errors from the payments service
 tailx -l error --service payments app.log
@@ -305,13 +305,13 @@ tailx -l error --service payments app.log
 dmesg | tailx -l warn
 
 # Anomaly-only view across multiple files
-tailx --incident /var/log/*.log
+tailx --incident *.log
 
 # Trace a specific request
 tailx --trace --trace-id req-abc-123 app.log
 
 # JSON output for AI consumption
-tailx --json -s -n --last 5m /var/log/syslog
+tailx --json -s -n --last 5m app.log
 
 # Natural language query
 tailx "why are payments failing" app.log

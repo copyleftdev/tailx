@@ -15,7 +15,7 @@ import subprocess
 import json
 
 result = subprocess.run(
-    ["tailx", "--json", "-s", "-n", "--last", "5m", "/var/log/syslog"],
+    ["tailx", "--json", "-s", "-n", "--last", "5m", "app.log"],
     capture_output=True,
     text=True
 )
@@ -33,7 +33,7 @@ print(f"Top issue: {triage['top_groups'][0]['exemplar']}")
 
 ```bash
 # Get triage summary as JSON
-TRIAGE=$(tailx --json -s -n --last 5m /var/log/syslog | tail -1)
+TRIAGE=$(tailx --json -s -n --last 5m app.log | tail -1)
 
 # Extract top group with jq
 echo "$TRIAGE" | jq -r '.top_groups[0].exemplar'
@@ -53,7 +53,7 @@ tailx can be exposed as an MCP (Model Context Protocol) tool. Here is a tool def
       "files": {
         "type": "array",
         "items": { "type": "string" },
-        "description": "Log file paths to analyze (e.g., [\"/var/log/syslog\"])"
+        "description": "Log file paths to analyze (e.g., [\"app.log\", \"db.log\"])"
       },
       "time_window": {
         "type": "string",
@@ -104,7 +104,7 @@ def tailx_triage(files, time_window=None, severity=None, grep=None, service=None
 
 ## What the AI receives
 
-When an agent calls `tailx_triage(files=["/var/log/syslog"], time_window="5m")`, it receives a structured object like:
+When an agent calls `tailx_triage(files=["app.log"], time_window="5m")`, it receives a structured object like:
 
 ```json
 {

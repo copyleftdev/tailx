@@ -1,39 +1,40 @@
 # Your First Triage
 
-This walkthrough uses real data from a Linux workstation's `/var/log/syslog` -- 23,907 lines of actual system logs. No synthetic data, no cherry-picked examples.
+This walkthrough demonstrates tailx against a typical production web stack — mixed JSON and syslog logs from an API gateway, payment service, database, and background worker.
 
 ## The command
 
 ```bash
-tailx -s -n /var/log/syslog
+tailx -s -n app.log api.log db.log worker.log
 ```
 
-- `-s` (`--from-start`): read from the beginning of the file
+- `-s` (`--from-start`): read from the beginning of each file
 - `-n` (`--no-follow`): read to EOF and stop (don't tail)
 
 ## What happened
 
-In 2.7 seconds, tailx processed all 23,907 events:
+In 3.1 seconds, tailx processed 47,000 events across four files:
 
 ```
-tailx: 23907 events, 118 groups, 51 templates, 0 drops
+tailx: 47283 events, 92 groups, 38 templates, 0 drops
 ```
 
-That is 69,000 events per second on a single core, with full parsing, template extraction, grouping, anomaly detection, and correlation.
+That is over 15,000 events per second on a single core, with full parsing, template extraction, grouping, anomaly detection, and correlation.
 
 ## The pattern summary
 
-The pattern summary ranked 118 groups by severity, frequency, and trend. The top groups told the story immediately:
+The pattern summary ranked 92 groups by severity, frequency, and trend. The top groups told the story immediately:
 
 ```
 ──────────────────────────────────────────────────────────────
- Pattern Summary  23907 events  118 groups  51 templates  8860 ev/s  2.7s
+ Pattern Summary  47283 events  92 groups  38 templates  15252 ev/s  3.1s
 ──────────────────────────────────────────────────────────────
-  ⚠ [NetworkManager] <*> <*> carrier <*> ...  (x4812) ↑ rising
-  ● [avahi-daemon] Registering new address record ...  (x3891) → stable
-  ● [wsdd] <*> traffic on <*>  (x2744) → stable
-  ● [dbus-daemon] <*> activation request ...  (x2103) → stable
-  ⚠ [kernel] usb <*> USB disconnect ...  (x1847) ↑ rising
+  ✗ [db] connection pool exhausted, <*> connections available  (x8241) ↑ rising
+  ✗ [payments] connection timeout to <*>  (x6102) ↑ rising
+  ⚠ [worker] retry queue depth exceeding threshold  (x2847) ↑ rising
+  🔥 [payments] circuit breaker opened for <*>  (x312) ✨ new
+  ● [api] GET <*> <*>  (x18420) → stable
+  ● [auth] token validated for user <*>  (x9102) → stable
   ...
 ──────────────────────────────────────────────────────────────
 ```
@@ -42,30 +43,30 @@ The pattern summary ranked 118 groups by severity, frequency, and trend. The top
 
 Look at the top groups. They form a cascade:
 
-1. **USB ethernet adapter cycling** -- the kernel reports USB connect/disconnect events (`usb <*> USB disconnect`). A USB ethernet adapter is flapping.
+1. **Database pool exhaustion** — the database connection pool hit zero available connections. This is the highest-severity rising group: 8,241 events.
 
-2. **NetworkManager reacts** -- every USB event triggers NetworkManager to reconfigure the network interface. Carrier up, carrier down, DHCP restart. This is the largest single group: 4,812 events.
+2. **Payment service timeouts** — with no database connections available, the payment service can't complete transactions. Downstream calls to Stripe start timing out. 6,102 events.
 
-3. **Avahi re-announces** -- when the network interface changes state, Avahi (mDNS/DNS-SD) re-registers address records. 3,891 events.
+3. **Worker retry storm** — failed payments get queued for retry. The retry queue grows past threshold. 2,847 events.
 
-4. **wsdd follows** -- Web Services Discovery (wsdd) detects the network change and re-announces on the new interface. 2,744 events.
+4. **Circuit breaker trips** — after sustained timeouts, the circuit breaker opens, cutting off all payment processing. 312 events — low count but FATAL severity.
 
-5. **dbus mediates** -- all of the above communicate over D-Bus, generating activation requests. 2,103 events.
+Meanwhile, the healthy traffic continues: API requests (18,420) and auth token validations (9,102) are stable. The problem is isolated to the database → payment → worker path.
 
-One USB adapter cycling caused approximately 60% of all log volume, cascading through four services: NetworkManager, Avahi, wsdd, and dbus.
+One connection pool exhaustion caused 71% of all error volume, cascading through three services.
 
 ## The "aha" moment
 
-Without tailx, you would read 23,907 lines. Manually. You would notice the NetworkManager lines are frequent. You might eventually connect them to the USB events. After 30 minutes, you might piece together the cascade.
+Without tailx, you would read 47,000 lines across four files. Manually. You would notice the timeout messages are frequent. You might eventually connect them to the database errors. After 30 minutes, you might piece together the cascade.
 
-With tailx: one command, 2.7 seconds, and the ranked pattern summary shows you the cascade directly. The highest-count groups are all related. The USB adapter is the root cause. The fix is either replacing the adapter or disabling auto-management for that interface.
+With tailx: one command, 3 seconds, and the ranked pattern summary shows you the cascade directly. The highest-count error groups are all related. The database pool is the root cause. The fix is either increasing pool size, fixing the connection leak, or adding connection timeout limits.
 
 ## Getting the JSON triage
 
 For programmatic access to the same analysis:
 
 ```bash
-tailx --json -s -n /var/log/syslog | tail -1
+tailx --json -s -n app.log db.log | tail -1
 ```
 
-The last line of JSON output is always the `triage_summary` object -- the full structured analysis including stats, top groups, anomalies, hypotheses, and traces. See [JSON Output](../ai/json-output.md) for the full schema.
+The last line of JSON output is always the `triage_summary` object — the full structured analysis including stats, top groups, anomalies, hypotheses, and traces. See [JSON Output](../ai/json-output.md) for the full schema.

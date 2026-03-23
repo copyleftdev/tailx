@@ -21,12 +21,12 @@ Processing statistics for the entire run.
 
 ```json
 {
-  "events": 23907,
-  "groups": 118,
-  "templates": 51,
+  "events": 47283,
+  "groups": 92,
+  "templates": 38,
   "drops": 0,
-  "events_per_sec": 8860.4,
-  "elapsed_ms": 2698
+  "events_per_sec": 15252.0,
+  "elapsed_ms": 3100
 }
 ```
 

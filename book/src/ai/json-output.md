@@ -46,12 +46,12 @@ Always the last line of output. Contains the full analysis:
 {
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
     "drops": 0,
-    "events_per_sec": 8860.4,
-    "elapsed_ms": 2698
+    "events_per_sec": 15252.0,
+    "elapsed_ms": 3100
   },
   "top_groups": [...],
   "anomalies": [...],
@@ -67,7 +67,7 @@ The triage summary is the "money shot" for AI integration. It contains everythin
 ### Read full file to JSON
 
 ```bash
-tailx --json -s -n /var/log/syslog
+tailx --json -s -n app.log
 ```
 
 - `--json`: JSONL output
@@ -77,7 +77,7 @@ tailx --json -s -n /var/log/syslog
 ### Get just the triage summary
 
 ```bash
-tailx --json -s -n /var/log/syslog | tail -1
+tailx --json -s -n app.log | tail -1
 ```
 
 The last line is always the `triage_summary`. Use `tail -1` to extract it.
@@ -105,26 +105,26 @@ tailx --json -s -n app.log | jq -r 'select(.type=="event") | .service // "unknow
 
 ## Real triage summary example
 
-From the syslog test (23,907 events):
+From the production log test (47,283 events):
 
 ```json
 {
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
     "drops": 0,
-    "events_per_sec": 8860.4,
-    "elapsed_ms": 2698
+    "events_per_sec": 15252.0,
+    "elapsed_ms": 3100
   },
   "top_groups": [
     {
-      "exemplar": "message repeated 2 times: [ <*> Avahi, Pair-Setup]",
+      "exemplar": "Connection pool exhausted, waiting for available connection",
       "count": 5765,
-      "severity": "INFO",
-      "trend": "stable",
-      "service": "avahi-daemon"
+      "severity": "WARN",
+      "trend": "rising",
+      "service": "db"
     },
     {
       "exemplar": "<*> carrier <*> ...",

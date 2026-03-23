@@ -35,7 +35,7 @@ Filters events whose message contains the given substring. Uses Boyer-Moore-Hors
 
 ```bash
 # Only events mentioning "OOM"
-tailx -g OOM /var/log/syslog
+tailx -g OOM app.log
 
 # Combine with severity
 tailx -l error -g timeout app.log
@@ -85,10 +85,10 @@ tailx --field hostname=web01 app.log
 ## Time window filter
 
 ```bash
-tailx --last 5m /var/log/syslog
+tailx --last 5m app.log
 tailx --last 1h app.log
 tailx --last 30s app.log
-tailx --last 2d /var/log/syslog
+tailx --last 2d app.log
 ```
 
 Only displays events from within the given time window relative to now. Supported units:

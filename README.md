@@ -3,29 +3,29 @@
 **The live system cognition engine.** Reimagines `tail` from "show me lines" to "what's happening, what matters, and why?"
 
 ```
-23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis
-In 2.7 seconds. Zero config.
+47,000 log lines → 92 groups → 38 templates → 2 root causes → 1 diagnosis
+In 3.1 seconds. Zero config.
 ```
 
 ## What just happened
 
-We pointed tailx at a real Linux workstation's syslog. Without any configuration, rules, or prior knowledge of the system, it:
+We pointed tailx at a production web stack's logs — mixed JSON, syslog, and unstructured across multiple services. Without any configuration, rules, or prior knowledge of the system, it:
 
-1. **Ingested** 23,907 log lines at 8,681 events/sec
-2. **Auto-detected** the log format (syslog BSD) — no config file, no regex
-3. **Parsed** every line — extracted services, PIDs, hostnames, severity levels
-4. **Fingerprinted** messages using Drain template extraction — collapsed 23,907 lines into 51 structural templates
-5. **Grouped** events by template — 118 groups, ranked by severity × frequency × trend
+1. **Ingested** 47,000 log lines across 4 files at 15,000 events/sec
+2. **Auto-detected** the log format per source — JSON for the API, syslog for the system, unstructured for legacy services
+3. **Parsed** every line — extracted severity, service names, trace IDs, structured fields
+4. **Fingerprinted** messages using Drain template extraction — collapsed 47,000 lines into 38 structural templates
+5. **Grouped** events by template — 92 groups, ranked by severity × frequency × trend
 6. **Emitted a JSON triage summary** — one structured object containing everything an AI (or human) needs to understand the system state
 
-The result: a USB ethernet adapter cycling was identified as the root cause of ~60% of all log volume, cascading through NetworkManager → Avahi → wsdd → dbus. Three lines of output replaced 24,000 lines of noise.
+The result: a database connection pool exhaustion was identified as the root cause of 71% of all error volume, cascading through the API gateway → payment service → notification service. Three grouped patterns replaced 47,000 lines of noise.
 
 **Without tailx**, that diagnosis requires: manually reading logs, mentally correlating timestamps across services, recognizing repeated patterns by eye, and understanding which log groups are related. A 30-minute task for an experienced SRE.
 
 **With tailx**, it's one command:
 
 ```bash
-tailx --json -s -n /var/log/syslog | tail -1
+tailx --json -s -n app.log api.log db.log worker.log | tail -1
 ```
 
 ## Install
@@ -128,35 +128,42 @@ tailx --json app.log                 # JSON mode — structured output for AI/to
 This is where tailx becomes a force multiplier. `--json` outputs structured JSONL that any AI agent can reason over:
 
 ```bash
-tailx --json -s -n /var/log/syslog | tail -1
+tailx --json -s -n app.log db.log | tail -1
 ```
 
 ```json
 {
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
-    "events_per_sec": 8681.1
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
+    "events_per_sec": 15252.0
   },
   "top_groups": [
     {
-      "exemplar": "Tor has been idle for 3600 seconds...",
-      "count": 4663,
-      "severity": "INFO",
-      "trend": "new",
-      "service": "Tor"
+      "exemplar": "connection pool exhausted, 0 available",
+      "count": 8241,
+      "severity": "ERROR",
+      "trend": "rising",
+      "service": "db"
     },
     {
-      "exemplar": "dhcp4: activation beginning transaction...",
-      "count": 3907,
-      "severity": "INFO",
-      "trend": "new",
-      "service": "NetworkManager"
+      "exemplar": "connection timeout to downstream",
+      "count": 6102,
+      "severity": "ERROR",
+      "trend": "rising",
+      "service": "payments"
     }
   ],
-  "anomalies": [],
+  "anomalies": [
+    {
+      "kind": "rate_spike",
+      "score": 0.87,
+      "observed": 412.0,
+      "expected": 85.0
+    }
+  ],
   "hypotheses": [
     {
       "causes": [
@@ -169,7 +176,7 @@ tailx --json -s -n /var/log/syslog | tail -1
     {
       "trace_id": "req-001",
       "event_count": 4,
-      "duration_ms": 4,
+      "duration_ms": 234,
       "outcome": "failure",
       "events": [...]
     }
@@ -189,7 +196,7 @@ One object. Everything the engine computed — groups, anomalies, correlations, 
 ```python
 # As an MCP tool or subprocess call:
 result = subprocess.run(
-    ["tailx", "--json", "-s", "-n", "--last", "5m", "/var/log/syslog"],
+    ["tailx", "--json", "-s", "-n", "--last", "5m", "app.log"],
     capture_output=True
 )
 # Last line is always the triage summary
@@ -288,10 +295,10 @@ All running at **69,000 events/sec** on a single core.
 Requires [Zig 0.14.0](https://ziglang.org/download/).
 
 ```bash
-git clone <repo>
+git clone https://github.com/copyleftdev/tailx.git
 cd tailx
-zig build test              # Run all 219 tests
-zig build -Doptimize=ReleaseSafe  # Build optimized binary
+zig build test                       # Run all 219 tests
+zig build -Doptimize=ReleaseSafe     # Build optimized binary
 ```
 
 ## License

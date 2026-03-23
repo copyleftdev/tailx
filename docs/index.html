@@ -7,7 +7,7 @@
 <meta name="description" content="Reimagines tail from 'show me lines' to 'what's happening, what matters, and why?' Auto-detects log formats, groups patterns, detects anomalies, reconstructs traces. 144 KB binary. Zero config. 69K events/sec."/>
 <meta name="keywords" content="log analysis, observability, tail, anomaly detection, pattern recognition, sre, devops, incident response, ai tools, zig"/>
 <meta property="og:title" content="tailx — Live System Cognition Engine"/>
-<meta property="og:description" content="23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis. In 2.7 seconds. Zero config."/>
+<meta property="og:description" content="47,000 log lines &rarr; 92 groups &rarr; 38 templates &rarr; 2 root causes &rarr; 1 diagnosis. In 3 seconds. Zero config."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://copyleftdev.github.io/tailx/"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -133,7 +133,7 @@ The Live System<br/><span class="text-primary">Cognition Engine</span>
 Reimagines <code class="bg-surface-container-high px-2 py-0.5 rounded text-on-surface font-mono">tail</code> from "show me lines" to "what's happening, what matters, and why?"
 </p>
 <p class="font-mono text-sm text-primary mb-10">
-23,907 syslog lines → 118 groups → 51 templates → 3 root causes → 1 diagnosis
+47,000 log lines &rarr; 92 groups &rarr; 38 templates &rarr; 2 root causes &rarr; 1 diagnosis
 </p>
 <div class="flex flex-col gap-4 max-w-2xl mx-auto w-full">
 <div class="flex items-center bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-1 pl-4 shadow-sm group hover:border-primary/50 transition-colors">
@@ -155,54 +155,54 @@ Clone Repo
 <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
 <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
 </div>
-<div class="text-xs font-mono text-outline">tailx -s -n /var/log/syslog</div>
+<div class="text-xs font-mono text-outline">tailx -s -n app.log api.log db.log worker.log</div>
 <div class="w-12"></div>
 </div>
 <div class="terminal-dark p-6 font-mono text-xs leading-relaxed overflow-x-auto">
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 <div class="opacity-40 select-none space-y-0.5">
-<div>4ubox NetworkManager[2876]: &lt;info&gt; dhcp4 activation...</div>
-<div>4ubox avahi-daemon[2711]: Interface enx92a...IPv6 no longer relevant</div>
-<div>4ubox NetworkManager[2876]: &lt;info&gt; dhcp4 activation...</div>
-<div>4ubox kernel: audit: apparmor="DENIED" operation="connect"...</div>
-<div>4ubox avahi-daemon[2711]: Registering new address record...</div>
-<div>4ubox Tor[4888]: Tor has been idle for 3600 seconds...</div>
-<div>4ubox NetworkManager[2876]: &lt;info&gt; device state change...</div>
-<div>4ubox avahi-daemon[2711]: Interface enx92a...IPv6 no longer relevant</div>
-<div class="t-dim">... 23,899 more lines ...</div>
+<div>{"level":"error","service":"payments","msg":"connection timeout to stripe","latency_ms":5200}</div>
+<div>{"level":"info","service":"api","msg":"GET /checkout 200","duration_ms":42}</div>
+<div>{"level":"error","service":"db","msg":"pool exhausted, 0 connections available"}</div>
+<div>{"level":"error","service":"payments","msg":"connection timeout to stripe","latency_ms":4800}</div>
+<div>{"level":"warn","service":"worker","msg":"retry queue depth at 847"}</div>
+<div>{"level":"error","service":"payments","msg":"connection timeout to stripe","latency_ms":6100}</div>
+<div>{"level":"info","service":"api","msg":"GET /health 200","duration_ms":2}</div>
+<div>{"level":"fatal","service":"payments","msg":"circuit breaker opened for stripe"}</div>
+<div class="t-dim">... 46,992 more lines ...</div>
 </div>
 <div class="space-y-3">
-<div class="text-[10px] uppercase tracking-widest t-dim mb-2">Pattern Summary &bull; 23,907 events &bull; 118 groups &bull; 51 templates &bull; 8,681 ev/s</div>
+<div class="text-[10px] uppercase tracking-widest t-dim mb-2">Pattern Summary &bull; 47,283 events &bull; 92 groups &bull; 38 templates &bull; 15,252 ev/s</div>
 <div class="bg-white/5 p-3 rounded border-l-2 border-[#f7768e]">
 <div class="flex justify-between items-center">
-<span class="t-red t-bold">Tor idle cycling</span>
-<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×4,663</span>
+<span class="t-red t-bold">DB pool exhausted</span>
+<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×8,241</span>
 </div>
-<div class="t-dim text-[10px] mt-1">Tor has been idle for 3600 seconds; assuming circuits no longer work</div>
-</div>
-<div class="bg-white/5 p-3 rounded border-l-2 border-[#e0af68]">
-<div class="flex justify-between items-center">
-<span class="t-yellow">NetworkManager DHCP churn</span>
-<span class="text-[10px] bg-[#e0af68]/20 text-[#e0af68] px-2 py-0.5 rounded font-bold">×3,907</span>
-</div>
-<div class="t-dim text-[10px] mt-1">dhcp4 (enx92a14f22dda8): activation beginning transaction</div>
-</div>
-<div class="bg-white/5 p-3 rounded border-l-2 border-[#e0af68]">
-<div class="flex justify-between items-center">
-<span class="t-yellow">Avahi interface bouncing</span>
-<span class="text-[10px] bg-[#e0af68]/20 text-[#e0af68] px-2 py-0.5 rounded font-bold">×3,213</span>
-</div>
-<div class="t-dim text-[10px] mt-1">Interface enx92a14f22dda8.IPv6 no longer relevant for mDNS</div>
+<div class="t-dim text-[10px] mt-1">connection pool exhausted, 0 connections available</div>
 </div>
 <div class="bg-white/5 p-3 rounded border-l-2 border-[#f7768e]">
 <div class="flex justify-between items-center">
-<span class="t-red">AppArmor DENIED</span>
-<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×1,855</span>
+<span class="t-red">Payment timeout</span>
+<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×6,102</span>
 </div>
-<div class="t-dim text-[10px] mt-1">wsdd blocked from /run/uuidd/request</div>
+<div class="t-dim text-[10px] mt-1">connection timeout to stripe after 5200ms</div>
+</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#e0af68]">
+<div class="flex justify-between items-center">
+<span class="t-yellow">Worker retry queue</span>
+<span class="text-[10px] bg-[#e0af68]/20 text-[#e0af68] px-2 py-0.5 rounded font-bold">×2,847</span>
+</div>
+<div class="t-dim text-[10px] mt-1">retry queue depth exceeding threshold</div>
+</div>
+<div class="bg-white/5 p-3 rounded border-l-2 border-[#f7768e]">
+<div class="flex justify-between items-center">
+<span class="t-red t-bold">Circuit breaker</span>
+<span class="text-[10px] bg-[#f7768e]/20 text-[#f7768e] px-2 py-0.5 rounded font-bold">×312</span>
+</div>
+<div class="t-dim text-[10px] mt-1">circuit breaker opened for stripe</div>
 </div>
 <div class="mt-3 pt-3 border-t border-white/10 t-dim text-[10px]">
-<span class="t-cyan">Root cause:</span> USB ethernet adapter cycling → NetworkManager → Avahi → wsdd cascade
+<span class="t-cyan">Root cause:</span> DB pool exhaustion → payment timeouts → circuit breaker → retry storm
 </div>
 </div>
 </div>
@@ -254,7 +254,7 @@ Clone Repo
 <span class="material-symbols-outlined text-3xl">group_work</span>
 </div>
 <h3 class="font-headline font-bold text-2xl mb-4">2. Group &amp; Rank</h3>
-<p class="text-outline leading-relaxed">Drain algorithm fingerprints messages into structural templates. 23,907 lines collapse into 51 templates. Groups ranked by severity &times; frequency &times; trend. Rising, stable, falling, gone.</p>
+<p class="text-outline leading-relaxed">Drain algorithm fingerprints messages into structural templates. 47,000 lines collapse into 38 templates. Groups ranked by severity &times; frequency &times; trend. Rising, stable, falling, gone.</p>
 </div>
 <div>
 <div class="mb-6 flex items-center justify-center w-16 h-16 rounded-lg bg-primary-container/20 text-primary">
@@ -274,32 +274,42 @@ Clone Repo
 <div class="bg-surface-container-highest p-8 rounded-lg border border-outline-variant/20 shadow-inner">
 <div class="flex items-center gap-2 mb-4 border-b border-outline-variant/20 pb-4">
 <span class="w-3 h-3 rounded-full bg-secondary"></span>
-<span class="font-mono text-xs text-outline">tailx --json -s -n /var/log/syslog | tail -1</span>
+<span class="font-mono text-xs text-outline">tailx --json -s -n app.log db.log | tail -1</span>
 </div>
 <pre class="font-mono text-xs leading-relaxed text-on-surface overflow-x-auto">{
   "type": "triage_summary",
   "stats": {
-    "events": 23907,
-    "groups": 118,
-    "templates": 51,
-    "events_per_sec": 8681.1
+    "events": 47283,
+    "groups": 92,
+    "templates": 38,
+    "events_per_sec": 15252.0
   },
   "top_groups": [
     {
-      "exemplar": "Tor idle for 3600 seconds...",
-      "count": 4663,
-      "severity": "INFO",
-      "trend": "new"
+      "exemplar": "connection pool exhausted",
+      "count": 8241,
+      "severity": "ERROR",
+      "trend": "rising",
+      "service": "db"
     },
     {
-      "exemplar": "dhcp4 activation...",
-      "count": 3907,
-      "trend": "new",
-      "service": "NetworkManager"
+      "exemplar": "connection timeout to stripe",
+      "count": 6102,
+      "severity": "ERROR",
+      "trend": "rising",
+      "service": "payments"
     }
   ],
-  "anomalies": [...],
-  "hypotheses": [...],
+  "anomalies": [
+    { "kind": "rate_spike", "score": 0.87,
+      "observed": 412.0, "expected": 85.0 }
+  ],
+  "hypotheses": [
+    { "causes": [
+        { "label": "DB pool exhaustion",
+          "strength": 0.91, "lag_ms": 1500 }
+      ], "confidence": 0.91 }
+  ],
   "traces": [...]
 }</pre>
 </div>

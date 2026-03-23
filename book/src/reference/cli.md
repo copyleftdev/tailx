@@ -74,7 +74,7 @@ Filter events whose message contains the given substring. Uses Boyer-Moore-Horsp
 
 ```bash
 tailx --service payments app.log
-tailx --service nginx /var/log/syslog
+tailx --service nginx app.log
 ```
 
 Filter events by exact service name match. The service is auto-detected from the log format (JSON `service` key, syslog app name, bracketed text in unstructured logs).
@@ -100,10 +100,10 @@ Filter events by field value. Supports string and integer comparison -- if the e
 ### `--last <duration>`
 
 ```bash
-tailx --last 5m /var/log/syslog
+tailx --last 5m app.log
 tailx --last 1h app.log
 tailx --last 30s app.log
-tailx --last 2d /var/log/syslog
+tailx --last 2d app.log
 ```
 
 Only display events from within the given time window. Supported suffixes: `s` (seconds), `m` (minutes), `h` (hours), `d` (days).
@@ -190,7 +190,7 @@ One or more file paths. Glob patterns (`*`, `?`) are expanded. Multiple files ar
 
 ```bash
 tailx "errors related to payments" app.log
-tailx "5xx from nginx" /var/log/syslog
+tailx "5xx from nginx" app.log
 tailx "timeout" app.log
 ```
 
@@ -213,7 +213,7 @@ When no files are specified and stdin is not a terminal, tailx reads from stdin.
 tailx app.log
 
 # Full file analysis
-tailx -s -n /var/log/syslog
+tailx -s -n app.log
 
 # Only errors from the payments service
 tailx -l error --service payments app.log
@@ -222,13 +222,13 @@ tailx -l error --service payments app.log
 dmesg | tailx -l warn
 
 # Anomaly-only view across multiple files
-tailx --incident /var/log/*.log
+tailx --incident *.log
 
 # Trace a specific request
 tailx --trace --trace-id req-abc-123 app.log
 
 # JSON output for AI consumption
-tailx --json -s -n --last 5m /var/log/syslog
+tailx --json -s -n --last 5m app.log
 
 # Natural language query
 tailx "why are payments failing" app.log
