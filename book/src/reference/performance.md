@@ -10,7 +10,7 @@ tailx is built for speed. The entire processing pipeline -- parsing, template ex
 | Measured on | 47,000 mixed-format lines in 3.1s |
 | Full pipeline | parse + Drain + group + trace + anomaly + correlation |
 
-This is not a synthetic benchmark. It is the actual measured throughput on real syslog data through the complete 12-stage pipeline.
+This is not a synthetic benchmark. It is measured throughput on real production log data through the complete 12-stage pipeline.
 
 ## Binary size
 

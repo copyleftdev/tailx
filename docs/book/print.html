@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "navy";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-d74c77a8.js";
+            window.path_to_searchindex_js = "searchindex-b0738798.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-ef60543d.js"></script>
@@ -1153,11 +1153,11 @@ echo "$TRIAGE" | jq -r '.top_groups[0].exemplar'
 <h2 id="design-rationale"><a class="header" href="#design-rationale">Design rationale</a></h2>
 <p>Why not have the AI read raw logs?</p>
 <ol>
-<li><strong>Volume</strong>: 24,000 lines of syslog would consume an entire context window. The triage summary is a few hundred tokens.</li>
-<li><strong>Signal-to-noise</strong>: 60% of the syslog was USB adapter cycling noise. The AI would waste tokens on irrelevant repetition.</li>
+<li><strong>Volume</strong>: 47,000 lines of logs would consume an entire context window. The triage summary is a few hundred tokens.</li>
+<li><strong>Signal-to-noise</strong>: most production logs are repetitive noise. The AI would waste tokens on irrelevant repetition. tailx collapses 47,000 lines into 38 templates.</li>
 <li><strong>Speed</strong>: tailx processes 69,000 events/sec. The pipeline runs in seconds, not minutes.</li>
 <li><strong>Determinism</strong>: statistical analysis (z-scores, CUSUM, EWMA) is reproducible. LLM pattern matching is not.</li>
-<li><strong>Cost</strong>: one subprocess call is effectively free. Feeding 24,000 lines to an LLM costs tokens and time.</li>
+<li><strong>Cost</strong>: one subprocess call is effectively free. Feeding 47,000 lines to an LLM costs tokens and time.</li>
 </ol>
 <p>The AI’s job is to interpret the structured triage, suggest fixes, and communicate findings to humans – not to count log lines.</p>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -2005,7 +2005,7 @@ tailx -l warn access.log error.log system.log
 </tbody>
 </table>
 </div>
-<p>This is not a synthetic benchmark. It is the actual measured throughput on real syslog data through the complete 12-stage pipeline.</p>
+<p>This is not a synthetic benchmark. It is measured throughput on real production log data through the complete 12-stage pipeline.</p>
 <h2 id="binary-size"><a class="header" href="#binary-size">Binary size</a></h2>
 <div class="table-wrapper">
 <table>

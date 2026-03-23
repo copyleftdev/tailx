@@ -154,10 +154,10 @@ The AI can now reason: "The top pattern group is rising connection refused error
 
 Why not have the AI read raw logs?
 
-1. **Volume**: 24,000 lines of syslog would consume an entire context window. The triage summary is a few hundred tokens.
-2. **Signal-to-noise**: 60% of the syslog was USB adapter cycling noise. The AI would waste tokens on irrelevant repetition.
+1. **Volume**: 47,000 lines of logs would consume an entire context window. The triage summary is a few hundred tokens.
+2. **Signal-to-noise**: most production logs are repetitive noise. The AI would waste tokens on irrelevant repetition. tailx collapses 47,000 lines into 38 templates.
 3. **Speed**: tailx processes 69,000 events/sec. The pipeline runs in seconds, not minutes.
 4. **Determinism**: statistical analysis (z-scores, CUSUM, EWMA) is reproducible. LLM pattern matching is not.
-5. **Cost**: one subprocess call is effectively free. Feeding 24,000 lines to an LLM costs tokens and time.
+5. **Cost**: one subprocess call is effectively free. Feeding 47,000 lines to an LLM costs tokens and time.
 
 The AI's job is to interpret the structured triage, suggest fixes, and communicate findings to humans -- not to count log lines.
