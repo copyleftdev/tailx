@@ -169,7 +169,7 @@ Display usage information with all modes, filters, options, and examples.
 
 ```bash
 tailx --version
-# tailx v1.0.0
+# tailx v1.0
 ```
 
 Display the version string.

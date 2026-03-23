@@ -10,7 +10,7 @@ const SubstringSearcher = tailx.query.filter.SubstringSearcher;
 const IntentParser = tailx.query.IntentParser;
 const JsonRenderer = tailx.render.JsonRenderer;
 
-const version = "1.0.0";
+const version = "1.0";
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};

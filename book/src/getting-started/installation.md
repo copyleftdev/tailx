@@ -43,7 +43,7 @@ This runs all 219 tests across every module: core types, parsers, statistical st
 
 ```bash
 tailx --version
-# tailx v1.0.0
+# tailx v1.0
 
 tailx --help
 # Shows usage, modes, filters, options
